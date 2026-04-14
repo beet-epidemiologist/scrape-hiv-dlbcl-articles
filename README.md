@@ -47,6 +47,9 @@
 
 如果你要做“文献新增入库监测”，可以改回 `[crdt]`。如果你更关注最新发表研究，`[dp]` 更合适。
 
+- `STRICT_RECENT_PUBLICATION=true`：开启后，所有来源统一按 `publication_date` 做后置过滤（默认开启）。
+
+
 ---
 
 ## 4. 为什么不能只依赖 MeSH / Publication Type

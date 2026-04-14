@@ -35,9 +35,9 @@ def _request_with_retry(url: str, params: Dict[str, str], timeout: int):
             if attempt >= len(RETRY_WAIT_SECONDS):
                 break
             wait = RETRY_WAIT_SECONDS[attempt]
-            print(f"[WARN] PubMed request retry {attempt + 1}/{len(RETRY_WAIT_SECONDS)} in {wait}s: {url}")
+            print(f"[WARN] PubMed retry {attempt + 1}/{len(RETRY_WAIT_SECONDS)} wait={wait}s url={url} params={params}")
             time.sleep(wait)
-    raise RuntimeError(f"PubMed request failed after retries: {url}") from last_error
+    raise RuntimeError(f"PubMed request failed after retries: url={url} params={params}") from last_error
 
 
 def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:

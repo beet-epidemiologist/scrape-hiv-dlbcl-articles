@@ -88,7 +88,7 @@ def run() -> int:
 
     scored = [score_and_tag(a, terms) for a in new_articles]
     recent_scored = _filter_recent_publication(scored, settings.strict_recent_publication)
-    print(f"[INFO] Recent publication filter kept={len(recent_scored)} dropped={len(scored)-len(recent_scored)} strict={settings.strict_recent_publication}")
+    print(f"[INFO] Recent publication filter strict={settings.strict_recent_publication} kept={len(recent_scored)} dropped={len(scored)-len(recent_scored)}")
     recent_scored.sort(key=lambda x: (x.relevance_score, x.publication_date), reverse=True)
 
     md_path, _ = generate_reports(recent_scored, failed_sources)
