@@ -16,7 +16,7 @@ pubmed_queries:
       )
     )
     AND hasabstract
-    AND ("last 14 days"[crdt])
+    AND ("last 14 days"[pdat])
 
   pubmed_therapy_ddi: |
     (
@@ -47,7 +47,7 @@ pubmed_queries:
       )
     )
     AND hasabstract
-    AND ("last 30 days"[crdt])
+    AND ("last 30 days"[pdat])
 
   pubmed_reviews_guidelines: |
     (
@@ -71,4 +71,4 @@ pubmed_queries:
         review[pt] OR practice guideline[pt] OR systematic[sb]
       )
     )
-    AND ("last 180 days"[crdt])
+    AND ("last 60 days"[pdat])
