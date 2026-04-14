@@ -1,6 +1,7 @@
 from src.models import Article
 from src.monitoring_mode import score_and_tag
 from src.reporters import generate_reports
+from src.utils import parse_publication_date
 
 
 TERMS = {
@@ -28,3 +29,10 @@ def test_empty_result_report() -> None:
     md_path, csv_path = generate_reports([], failed_sources=[])
     assert md_path.exists()
     assert csv_path.exists()
+
+
+def test_parse_publication_date_variants() -> None:
+    assert parse_publication_date("2026 Apr 10").isoformat() == "2026-04-10"
+    assert parse_publication_date("2026 Apr").isoformat() == "2026-04-01"
+    assert parse_publication_date("2026").isoformat() == "2026-01-01"
+    assert parse_publication_date("not-a-date") is None

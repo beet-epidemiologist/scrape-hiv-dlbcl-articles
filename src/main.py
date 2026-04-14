@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
 from typing import List
 
 from src.config import load_queries, load_search_terms, load_settings
@@ -12,7 +13,7 @@ from src.sources.crossref import fetch_crossref
 from src.sources.europe_pmc import fetch_europe_pmc
 from src.sources.pubmed import fetch_pubmed
 from src.sources.rxiv import fetch_rxiv
-from src.utils import load_seen_ids, save_seen_ids
+from src.utils import load_seen_ids, parse_publication_date, save_seen_ids
 
 
 def run() -> int:
@@ -41,6 +42,14 @@ def run() -> int:
     new_articles, updated_seen = filter_new_articles(all_articles, seen_ids)
 
     scored = [score_and_tag(a, terms) for a in new_articles]
+    if settings.strict_recent_publication:
+        cutoff = date.today() - timedelta(days=settings.lookback_days)
+        before = len(scored)
+        scored = [a for a in scored if (parse_publication_date(a.publication_date) or date.min) >= cutoff]
+        print(
+            f"[INFO] strict_recent_publication enabled: kept {len(scored)}/{before} articles "
+            f"with publication_date >= {cutoff.isoformat()}"
+        )
     scored.sort(key=lambda x: (x.relevance_score, x.publication_date), reverse=True)
 
     md_path, _ = generate_reports(scored, failed_sources)

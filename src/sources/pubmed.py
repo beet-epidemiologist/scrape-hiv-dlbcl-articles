@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import Dict, Iterable, List
 from xml.etree import ElementTree as ET
 
@@ -11,30 +12,75 @@ ESUMMARY_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 
-def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
+def _chunked(items: List[str], size: int) -> Iterable[List[str]]:
+    for i in range(0, len(items), size):
+        yield items[i : i + size]
+
+
+def _request_with_retry(
+    requests_module,
+    url: str,
+    params: Dict[str, str],
+    timeout: int,
+    max_retries: int = 3,
+):
+    for attempt in range(max_retries + 1):
+        resp = requests_module.get(url, params=params, timeout=timeout)
+        if resp.status_code != 429:
+            resp.raise_for_status()
+            return resp
+        if attempt >= max_retries:
+            resp.raise_for_status()
+        retry_after = resp.headers.get("Retry-After")
+        delay = float(retry_after) if retry_after else min(8.0, 1.5 * (2**attempt))
+        print(f"[WARN] PubMed rate-limited (429) at {url}; retry {attempt + 1}/{max_retries} in {delay:.1f}s")
+        time.sleep(delay)
+    raise RuntimeError("PubMed request retries exhausted")
+
+
+def fetch_pubmed(queries: Dict[str, str], timeout: int = 30, batch_size: int = 100) -> List[Article]:
     import requests
 
     pmids: set[str] = set()
-    for _, query in queries.items():
-        resp = requests.get(ESEARCH_URL, params={"db": "pubmed", "term": query, "retmode": "json", "retmax": 200}, timeout=timeout)
-        resp.raise_for_status()
+    for name, query in queries.items():
+        resp = _request_with_retry(
+            requests,
+            ESEARCH_URL,
+            {"db": "pubmed", "term": query, "retmode": "json", "retmax": 200},
+            timeout=timeout,
+        )
         ids = resp.json().get("esearchresult", {}).get("idlist", [])
         pmids.update(ids)
+        print(f"[INFO] PubMed query '{name}': +{len(ids)} PMIDs (unique total: {len(pmids)})")
 
     if not pmids:
         return []
 
-    id_str = ",".join(sorted(pmids))
-    summary_resp = requests.get(ESUMMARY_URL, params={"db": "pubmed", "id": id_str, "retmode": "json"}, timeout=timeout)
-    summary_resp.raise_for_status()
-    summary = summary_resp.json().get("result", {})
+    summary: Dict[str, Dict] = {}
+    abstracts_by_pmid: Dict[str, str] = {}
+    pmid_list = sorted(pmids)
+    for idx, batch in enumerate(_chunked(pmid_list, batch_size), start=1):
+        id_str = ",".join(batch)
+        print(f"[INFO] PubMed batch {idx}: requesting {len(batch)} records")
 
-    fetch_resp = requests.get(EFETCH_URL, params={"db": "pubmed", "id": id_str, "retmode": "xml", "rettype": "abstract"}, timeout=timeout)
-    fetch_resp.raise_for_status()
-    abstracts_by_pmid = _parse_abstracts_from_efetch_xml(fetch_resp.text)
+        summary_resp = _request_with_retry(
+            requests,
+            ESUMMARY_URL,
+            {"db": "pubmed", "id": id_str, "retmode": "json"},
+            timeout=timeout,
+        )
+        summary.update(summary_resp.json().get("result", {}))
+
+        fetch_resp = _request_with_retry(
+            requests,
+            EFETCH_URL,
+            {"db": "pubmed", "id": id_str, "retmode": "xml", "rettype": "abstract"},
+            timeout=timeout,
+        )
+        abstracts_by_pmid.update(_parse_abstracts_from_efetch_xml(fetch_resp.text))
 
     articles: List[Article] = []
-    for pmid in pmids:
+    for pmid in pmid_list:
         item = summary.get(pmid, {})
         doi = ""
         for aid in item.get("articleids", []):

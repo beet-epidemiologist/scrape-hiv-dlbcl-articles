@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -42,3 +43,21 @@ def save_seen_ids(path: str | Path, data: Dict[str, List[str]]) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def parse_publication_date(raw: str) -> date | None:
+    text = (raw or "").strip()
+    if not text:
+        return None
+
+    for fmt in ("%Y %b %d", "%Y-%m-%d", "%Y %b", "%Y-%m", "%Y"):
+        try:
+            parsed = datetime.strptime(text, fmt)
+            if fmt == "%Y":
+                return date(parsed.year, 1, 1)
+            if fmt in ("%Y %b", "%Y-%m"):
+                return date(parsed.year, parsed.month, 1)
+            return parsed.date()
+        except ValueError:
+            continue
+    return None

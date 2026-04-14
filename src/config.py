@@ -19,10 +19,12 @@ class Settings:
     email_password: str
     email_to: str
     lookback_days: int = 14
+    strict_recent_publication: bool = True
 
 
 def load_settings() -> Settings:
     load_dotenv()
+    strict_recent = os.getenv("STRICT_RECENT_PUBLICATION", "1").strip().lower() in {"1", "true", "yes", "on"}
     return Settings(
         crossref_mailto=os.getenv("CROSSREF_MAILTO", ""),
         email_host=os.getenv("EMAIL_HOST", ""),
@@ -31,6 +33,7 @@ def load_settings() -> Settings:
         email_password=os.getenv("EMAIL_PASSWORD", ""),
         email_to=os.getenv("EMAIL_TO", ""),
         lookback_days=int(os.getenv("MONITOR_LOOKBACK_DAYS", "14") or 14),
+        strict_recent_publication=strict_recent,
     )
 
 
