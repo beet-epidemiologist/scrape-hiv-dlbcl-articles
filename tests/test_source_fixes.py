@@ -1,5 +1,5 @@
 from src.sources.europe_pmc import _in_window, build_europe_pmc_query
-from src.sources.pubmed import _parse_abstracts_from_efetch_xml, fetch_pubmed
+from src.sources.pubmed import _parse_abstracts_from_efetch_xml, _window_for_query_name, fetch_pubmed
 from src.sources.rxiv import _match_topic
 
 
@@ -95,5 +95,12 @@ def test_pubmed_retry_and_batching(monkeypatch) -> None:
 
     articles = fetch_pubmed({"q1": "x"}, batch_size=2)
     assert len(articles) == 5
+    assert all(a.category == "pubmed_window_14d" for a in articles)
     assert calls["esummary"] == 4  # 3 batches + 1 retry
     assert calls["efetch"] == 3
+
+
+def test_pubmed_query_window_mapping() -> None:
+    assert _window_for_query_name("pubmed_core_latest") == 14
+    assert _window_for_query_name("pubmed_therapy_ddi") == 30
+    assert _window_for_query_name("pubmed_reviews_guidelines") == 60

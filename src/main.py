@@ -19,6 +19,12 @@ from src.utils import load_seen_ids, parse_publication_date, save_seen_ids
 def _recent_window_days(article: Article, default_days: int) -> int:
     if article.source_database != "PubMed":
         return default_days
+    if article.category == "pubmed_window_60d":
+        return 60
+    if article.category == "pubmed_window_30d":
+        return 30
+    if article.category == "pubmed_window_14d":
+        return 14
     tags = set(article.tags or [])
     if "review_guideline" in tags:
         return 60

@@ -12,6 +12,15 @@ ESUMMARY_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 
+def _window_for_query_name(query_name: str) -> int:
+    name = (query_name or "").lower()
+    if "review" in name or "guideline" in name:
+        return 60
+    if "therapy" in name or "ddi" in name:
+        return 30
+    return 14
+
+
 def _chunked(items: List[str], size: int) -> Iterable[List[str]]:
     for i in range(0, len(items), size):
         yield items[i : i + size]
@@ -42,6 +51,7 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30, batch_size: int = 1
     import requests
 
     pmids: set[str] = set()
+    pmid_window_days: Dict[str, int] = {}
     for name, query in queries.items():
         resp = _request_with_retry(
             requests,
@@ -51,6 +61,9 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30, batch_size: int = 1
         )
         ids = resp.json().get("esearchresult", {}).get("idlist", [])
         pmids.update(ids)
+        window_days = _window_for_query_name(name)
+        for pmid in ids:
+            pmid_window_days[pmid] = max(window_days, pmid_window_days.get(pmid, 0))
         print(f"[INFO] PubMed query '{name}': +{len(ids)} PMIDs (unique total: {len(pmids)})")
 
     if not pmids:
@@ -103,6 +116,7 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30, batch_size: int = 1
                 abstract=abstracts_by_pmid.get(pmid, ""),
                 url=f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
                 source_database="PubMed",
+                category=f"pubmed_window_{pmid_window_days.get(pmid, 14)}d",
             )
         )
     return articles
