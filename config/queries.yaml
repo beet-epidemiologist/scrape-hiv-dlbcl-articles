@@ -1,0 +1,74 @@
+pubmed_queries:
+  pubmed_core_latest: |
+    (
+      (
+        HIV[tiab] OR "human immunodeficiency virus"[tiab] OR AIDS[tiab] OR
+        "acquired immunodeficiency syndrome"[tiab] OR "HIV-associated"[tiab] OR
+        "HIV related"[tiab] OR "HIV-related"[tiab] OR "HIV Infections"[mh]
+      )
+      AND
+      (
+        DLBCL[tiab] OR "diffuse large b-cell lymphoma"[tiab] OR
+        "diffuse large B cell lymphoma"[tiab] OR
+        "diffuse large-cell lymphoma"[tiab] OR
+        "large B-cell lymphoma"[tiab] OR
+        "Lymphoma, Large B-Cell, Diffuse"[mh]
+      )
+    )
+    AND hasabstract
+    AND ("last 14 days"[dp])
+
+  pubmed_therapy_ddi: |
+    (
+      (
+        (
+          HIV[tiab] OR "human immunodeficiency virus"[tiab] OR AIDS[tiab] OR
+          "acquired immunodeficiency syndrome"[tiab] OR "HIV-associated"[tiab] OR
+          "HIV related"[tiab] OR "HIV-related"[tiab] OR "HIV Infections"[mh]
+        )
+        AND
+        (
+          DLBCL[tiab] OR "diffuse large b-cell lymphoma"[tiab] OR
+          "diffuse large B cell lymphoma"[tiab] OR
+          "diffuse large-cell lymphoma"[tiab] OR
+          "large B-cell lymphoma"[tiab] OR
+          "Lymphoma, Large B-Cell, Diffuse"[mh]
+        )
+      )
+      AND
+      (
+        antiretroviral*[tiab] OR ART[tiab] OR cART[tiab] OR HAART[tiab] OR
+        chemotherapy[tiab] OR immunochemotherapy[tiab] OR rituximab[tiab] OR
+        R-CHOP[tiab] OR CHOP[tiab] OR EPOCH[tiab] OR DA-EPOCH-R[tiab] OR
+        polatuzumab[tiab] OR lenalidomide[tiab] OR CAR-T[tiab] OR
+        "drug interaction*"[tiab] OR "drug-drug interaction*"[tiab] OR
+        pharmacokinetic*[tiab] OR CYP3A[tiab] OR cobicistat[tiab] OR
+        ritonavir[tiab] OR dolutegravir[tiab] OR bictegravir[tiab]
+      )
+    )
+    AND hasabstract
+    AND ("last 30 days"[dp])
+
+  pubmed_reviews_guidelines: |
+    (
+      (
+        (
+          HIV[tiab] OR "human immunodeficiency virus"[tiab] OR AIDS[tiab] OR
+          "acquired immunodeficiency syndrome"[tiab] OR "HIV Infections"[mh] OR
+          "Lymphoma, AIDS-Related"[mh]
+        )
+        AND
+        (
+          DLBCL[tiab] OR "diffuse large b-cell lymphoma"[tiab] OR
+          "diffuse large B cell lymphoma"[tiab] OR
+          "Lymphoma, Large B-Cell, Diffuse"[mh]
+        )
+      )
+      AND
+      (
+        review[tiab] OR "systematic review"[tiab] OR meta-analysis[tiab] OR
+        guideline[tiab] OR consensus[tiab] OR recommendation*[tiab] OR
+        review[pt] OR practice guideline[pt] OR systematic[sb]
+      )
+    )
+    AND ("last 60 days"[dp])
