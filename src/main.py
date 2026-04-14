@@ -16,6 +16,17 @@ from src.sources.rxiv import fetch_rxiv
 from src.utils import load_seen_ids, parse_publication_date, save_seen_ids
 
 
+def _recent_window_days(article: Article, default_days: int) -> int:
+    if article.source_database != "PubMed":
+        return default_days
+    tags = set(article.tags or [])
+    if "review_guideline" in tags:
+        return 60
+    if "treatment" in tags or "drug_interaction" in tags:
+        return 30
+    return 14
+
+
 def run() -> int:
     settings = load_settings()
     terms = load_search_terms()
@@ -43,12 +54,18 @@ def run() -> int:
 
     scored = [score_and_tag(a, terms) for a in new_articles]
     if settings.strict_recent_publication:
-        cutoff = date.today() - timedelta(days=settings.lookback_days)
         before = len(scored)
-        scored = [a for a in scored if (parse_publication_date(a.publication_date) or date.min) >= cutoff]
+        kept: List[Article] = []
+        for article in scored:
+            pub_date = parse_publication_date(article.publication_date) or date.min
+            window_days = _recent_window_days(article, settings.lookback_days)
+            cutoff = date.today() - timedelta(days=window_days)
+            if pub_date >= cutoff:
+                kept.append(article)
+        scored = kept
         print(
             f"[INFO] strict_recent_publication enabled: kept {len(scored)}/{before} articles "
-            f"with publication_date >= {cutoff.isoformat()}"
+            "(PubMed windows: core=14d, therapy/ddi=30d, review/guideline=60d)"
         )
     scored.sort(key=lambda x: (x.relevance_score, x.publication_date), reverse=True)
 

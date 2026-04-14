@@ -71,4 +71,4 @@ pubmed_queries:
         review[pt] OR practice guideline[pt] OR systematic[sb]
       )
     )
-    AND ("last 180 days"[pdat])
+    AND ("last 60 days"[pdat])
