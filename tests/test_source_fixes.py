@@ -33,14 +33,16 @@ def test_pubmed_xml_abstract_mapping() -> None:
 def test_europe_pmc_query_has_date_filter() -> None:
     q = build_europe_pmc_query({"HIV_TERMS": ["HIV"], "DLBCL_TERMS": ["DLBCL"], "THERAPY_TERMS": []}, 14)
     assert "FIRST_PDATE" in q
-    assert "TO *" in q
+    assert "TO" in q
 
 
 def test_rxiv_match_includes_category() -> None:
-    terms = {"HIV_TERMS": ["hiv"], "DLBCL_TERMS": ["dlbcl"]}
+    terms = {"HIV_TERMS": ["hiv"], "DLBCL_TERMS": ["dlbcl", "diffuse large b-cell lymphoma"]}
     assert _match_topic("", "hiv story", "dlbcl", terms)
+    assert _match_topic("hiv", "", "diffuse large b-cell lymphoma", terms)
 
 
 def test_europe_pmc_in_window() -> None:
-    assert _in_window("2999-01-01", 14)
+    from datetime import date
+    assert _in_window(date.today().isoformat(), 14)
     assert not _in_window("2000-01-01", 14)

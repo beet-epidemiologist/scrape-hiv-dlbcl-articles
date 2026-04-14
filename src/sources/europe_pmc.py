@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from typing import Dict, List
 
-
 from src.models import Article
 
 
@@ -12,20 +11,20 @@ def build_europe_pmc_query(terms: Dict[str, List[str]], lookback_days: int) -> s
     dlbcl = " OR ".join(f'"{t}"' for t in terms.get("DLBCL_TERMS", [])[:6])
     therapy = " OR ".join(f'"{t}"' for t in terms.get("THERAPY_TERMS", [])[:8])
     start = (date.today() - timedelta(days=lookback_days)).isoformat()
+    end = date.today().isoformat()
     base = f"(({hiv}) AND ({dlbcl})) OR (({hiv}) AND ({dlbcl}) AND ({therapy}))"
-    return f"({base}) AND FIRST_PDATE:[{start} TO *]"
-
-
+    return f"({base}) AND FIRST_PDATE:[{start} TO {end}]"
 
 
 def _in_window(publication_date: str, lookback_days: int) -> bool:
     if not publication_date:
         return False
     start = date.today() - timedelta(days=lookback_days)
+    end = date.today()
     for fmt in ("%Y-%m-%d", "%Y-%m", "%Y"):
         try:
             parsed = datetime.strptime(publication_date, fmt).date()
-            return parsed >= start
+            return start <= parsed <= end
         except ValueError:
             continue
     return False
@@ -33,6 +32,7 @@ def _in_window(publication_date: str, lookback_days: int) -> bool:
 
 def fetch_europe_pmc(terms: Dict[str, List[str]], lookback_days: int = 14, timeout: int = 30) -> List[Article]:
     import requests
+
     query = build_europe_pmc_query(terms, lookback_days)
     resp = requests.get(
         "https://www.ebi.ac.uk/europepmc/webservices/rest/search",

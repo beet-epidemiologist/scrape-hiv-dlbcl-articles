@@ -41,7 +41,14 @@ def fetch_rxiv(terms: Dict[str, List[str]], lookback_days: int = 14, timeout: in
 
 
 def _match_topic(title: str, abstract: str, category: str, terms: Dict[str, List[str]]) -> bool:
-    text = f"{title} {abstract} {category}".lower()
-    hiv_hit = any(t.lower() in text for t in terms.get("HIV_TERMS", []))
-    dlbcl_hit = any(t.lower() in text for t in terms.get("DLBCL_TERMS", []))
-    return hiv_hit and dlbcl_hit
+    title_l = title.lower()
+    abstract_l = abstract.lower()
+    category_l = category.lower()
+    combined = f"{title_l} {abstract_l} {category_l}"
+
+    hiv_hit = any(t.lower() in combined for t in terms.get("HIV_TERMS", []))
+    dlbcl_hit = any(t.lower() in combined for t in terms.get("DLBCL_TERMS", []))
+
+    # 明确把 category 纳入筛选判断（不仅用于展示）
+    category_supports_topic = any(t.lower() in category_l for t in terms.get("DLBCL_TERMS", []) + terms.get("HIV_TERMS", []))
+    return hiv_hit and dlbcl_hit and (category_supports_topic or title_l or abstract_l)

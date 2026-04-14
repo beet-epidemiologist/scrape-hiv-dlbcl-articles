@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict, Iterable, List
 from xml.etree import ElementTree as ET
-
 
 from src.models import Article
 
@@ -14,6 +13,7 @@ EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
     import requests
+
     pmids: set[str] = set()
     for _, query in queries.items():
         resp = requests.get(ESEARCH_URL, params={"db": "pubmed", "term": query, "retmode": "json", "retmax": 200}, timeout=timeout)
@@ -62,27 +62,29 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
     return articles
 
 
+def _iter_pubmed_records(root: ET.Element) -> Iterable[ET.Element]:
+    yield from root.findall(".//PubmedArticle")
+    yield from root.findall(".//PubmedBookArticle")
+
+
 def _parse_abstracts_from_efetch_xml(xml_text: str) -> Dict[str, str]:
     abstracts: Dict[str, str] = {}
     root = ET.fromstring(xml_text)
 
-    for article in root.findall('.//PubmedArticle'):
-        pmid_node = article.find('.//MedlineCitation/PMID')
+    for record in _iter_pubmed_records(root):
+        pmid_node = record.find(".//MedlineCitation/PMID")
         if pmid_node is None or not pmid_node.text:
             continue
         pmid = pmid_node.text.strip()
 
-        abstract_nodes = article.findall('.//MedlineCitation/Article/Abstract/AbstractText')
+        abstract_nodes = record.findall(".//MedlineCitation/Article/Abstract/AbstractText")
         segments: List[str] = []
         for node in abstract_nodes:
             label = (node.attrib.get("Label", "") or "").strip()
             section_text = "".join(node.itertext()).strip()
             if not section_text:
                 continue
-            if label:
-                segments.append(f"{label}: {section_text}")
-            else:
-                segments.append(section_text)
+            segments.append(f"{label}: {section_text}" if label else section_text)
         abstracts[pmid] = " ".join(segments).strip()
 
     return abstracts
