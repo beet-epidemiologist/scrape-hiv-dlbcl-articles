@@ -1,0 +1,70 @@
+HIV_TERMS:
+  - HIV
+  - human immunodeficiency virus
+  - AIDS
+  - acquired immunodeficiency syndrome
+  - HIV-associated
+  - HIV related
+  - HIV-related
+  - HIV Infections
+
+DLBCL_TERMS:
+  - DLBCL
+  - diffuse large b-cell lymphoma
+  - diffuse large B cell lymphoma
+  - diffuse large-cell lymphoma
+  - large B-cell lymphoma
+  - Lymphoma, Large B-Cell, Diffuse
+
+AIDS_LYMPHOMA_TERMS:
+  - AIDS-related lymphoma
+  - AIDS-associated lymphoma
+  - HIV-related lymphoma
+  - HIV-associated lymphoma
+  - Lymphoma, AIDS-Related
+
+THERAPY_TERMS:
+  - antiretroviral
+  - antiretroviral therapy
+  - ART
+  - cART
+  - HAART
+  - chemotherapy
+  - immunochemotherapy
+  - rituximab
+  - R-CHOP
+  - CHOP
+  - EPOCH
+  - DA-EPOCH-R
+  - polatuzumab
+  - lenalidomide
+  - CAR-T
+  - stem cell transplant
+  - drug interaction
+  - drug-drug interaction
+  - pharmacokinetic
+  - CYP3A
+  - cobicistat
+  - ritonavir
+  - dolutegravir
+  - bictegravir
+
+OUTCOME_TERMS:
+  - prognosis
+  - survival
+  - overall survival
+  - progression-free survival
+  - response
+  - remission
+  - relapse
+  - mortality
+  - outcome
+
+REVIEW_GUIDELINE_TERMS:
+  - review
+  - systematic review
+  - meta-analysis
+  - guideline
+  - consensus
+  - recommendation
+  - state-of-the-art
