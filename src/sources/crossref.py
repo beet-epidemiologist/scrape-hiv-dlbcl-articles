@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Dict, List
 
-import requests
 
 from src.models import Article
 
@@ -15,6 +14,7 @@ def build_crossref_query(terms: Dict[str, List[str]]) -> str:
 
 
 def fetch_crossref(terms: Dict[str, List[str]], mailto: str, lookback_days: int = 30, timeout: int = 30) -> List[Article]:
+    import requests
     if not mailto:
         return []
     start = (date.today() - timedelta(days=lookback_days)).isoformat()

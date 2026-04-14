@@ -3,12 +3,12 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Dict, List
 
-import requests
 
 from src.models import Article
 
 
-def fetch_rxiv(terms: Dict[str, List[str]], lookback_days: int = 30, timeout: int = 30) -> List[Article]:
+def fetch_rxiv(terms: Dict[str, List[str]], lookback_days: int = 14, timeout: int = 30) -> List[Article]:
+    import requests
     start = (date.today() - timedelta(days=lookback_days)).isoformat()
     end = date.today().isoformat()
     results: List[Article] = []
@@ -20,7 +20,8 @@ def fetch_rxiv(terms: Dict[str, List[str]], lookback_days: int = 30, timeout: in
         for item in collection:
             title = item.get("title", "")
             abstract = item.get("abstract", "")
-            if not _match_topic(title, abstract, terms):
+            category = item.get("category", "")
+            if not _match_topic(title, abstract, category, terms):
                 continue
             results.append(
                 Article(
@@ -33,14 +34,14 @@ def fetch_rxiv(terms: Dict[str, List[str]], lookback_days: int = 30, timeout: in
                     url=f"https://doi.org/{item.get('doi', '')}" if item.get("doi") else "",
                     source_database=server,
                     is_preprint=True,
-                    category=item.get("category", ""),
+                    category=category,
                 )
             )
     return results
 
 
-def _match_topic(title: str, abstract: str, terms: Dict[str, List[str]]) -> bool:
-    text = f"{title} {abstract}".lower()
+def _match_topic(title: str, abstract: str, category: str, terms: Dict[str, List[str]]) -> bool:
+    text = f"{title} {abstract} {category}".lower()
     hiv_hit = any(t.lower() in text for t in terms.get("HIV_TERMS", []))
     dlbcl_hit = any(t.lower() in text for t in terms.get("DLBCL_TERMS", []))
     return hiv_hit and dlbcl_hit

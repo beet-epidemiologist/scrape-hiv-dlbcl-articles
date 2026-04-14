@@ -30,6 +30,7 @@ def load_settings() -> Settings:
         email_user=os.getenv("EMAIL_USER", ""),
         email_password=os.getenv("EMAIL_PASSWORD", ""),
         email_to=os.getenv("EMAIL_TO", ""),
+        lookback_days=int(os.getenv("MONITOR_LOOKBACK_DAYS", "14") or 14),
     )
 
 

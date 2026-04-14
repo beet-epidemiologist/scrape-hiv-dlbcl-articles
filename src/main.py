@@ -25,9 +25,9 @@ def run() -> int:
 
     source_jobs = [
         ("PubMed", lambda: fetch_pubmed(queries)),
-        ("Europe PMC", lambda: fetch_europe_pmc(terms)),
-        ("Crossref", lambda: fetch_crossref(terms, settings.crossref_mailto, lookback_days=30)),
-        ("Rxiv", lambda: fetch_rxiv(terms, lookback_days=30)),
+        ("Europe PMC", lambda: fetch_europe_pmc(terms, lookback_days=settings.lookback_days)),
+        ("Crossref", lambda: fetch_crossref(terms, settings.crossref_mailto, lookback_days=settings.lookback_days)),
+        ("Rxiv", lambda: fetch_rxiv(terms, lookback_days=settings.lookback_days)),
     ]
 
     for name, job in source_jobs:

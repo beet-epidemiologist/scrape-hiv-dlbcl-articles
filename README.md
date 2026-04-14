@@ -111,6 +111,7 @@ cp .env.example .env
 ```
 
 `.env` 最少可配置：
+- `MONITOR_LOOKBACK_DAYS=14`（统一监测窗口，Europe PMC / Crossref / Rxiv 共用）
 - `CROSSREF_MAILTO=you@example.com`（建议填写，Crossref 补充源会使用）
 - 邮件通知相关（可不填，不填会自动跳过）：
   - `EMAIL_HOST`

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from typing import Dict, List
+from xml.etree import ElementTree as ET
 
-import requests
 
 from src.models import Article
 
@@ -13,6 +13,7 @@ EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 
 def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
+    import requests
     pmids: set[str] = set()
     for _, query in queries.items():
         resp = requests.get(ESEARCH_URL, params={"db": "pubmed", "term": query, "retmode": "json", "retmax": 200}, timeout=timeout)
@@ -28,9 +29,9 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
     summary_resp.raise_for_status()
     summary = summary_resp.json().get("result", {})
 
-    fetch_resp = requests.get(EFETCH_URL, params={"db": "pubmed", "id": id_str, "retmode": "text", "rettype": "abstract"}, timeout=timeout)
+    fetch_resp = requests.get(EFETCH_URL, params={"db": "pubmed", "id": id_str, "retmode": "xml", "rettype": "abstract"}, timeout=timeout)
     fetch_resp.raise_for_status()
-    abstract_raw = fetch_resp.text
+    abstracts_by_pmid = _parse_abstracts_from_efetch_xml(fetch_resp.text)
 
     articles: List[Article] = []
     for pmid in pmids:
@@ -53,7 +54,7 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
                 doi=doi,
                 pmid=pmid,
                 pmcid=pmcid,
-                abstract=_extract_abstract_for_pmid(abstract_raw, pmid),
+                abstract=abstracts_by_pmid.get(pmid, ""),
                 url=f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
                 source_database="PubMed",
             )
@@ -61,10 +62,27 @@ def fetch_pubmed(queries: Dict[str, str], timeout: int = 30) -> List[Article]:
     return articles
 
 
-def _extract_abstract_for_pmid(efetch_text: str, pmid: str) -> str:
-    marker = f"PMID: {pmid}"
-    idx = efetch_text.find(marker)
-    if idx == -1:
-        return ""
-    block = efetch_text[max(0, idx - 2000):idx]
-    return " ".join(block.splitlines()[-8:]).strip()
+def _parse_abstracts_from_efetch_xml(xml_text: str) -> Dict[str, str]:
+    abstracts: Dict[str, str] = {}
+    root = ET.fromstring(xml_text)
+
+    for article in root.findall('.//PubmedArticle'):
+        pmid_node = article.find('.//MedlineCitation/PMID')
+        if pmid_node is None or not pmid_node.text:
+            continue
+        pmid = pmid_node.text.strip()
+
+        abstract_nodes = article.findall('.//MedlineCitation/Article/Abstract/AbstractText')
+        segments: List[str] = []
+        for node in abstract_nodes:
+            label = (node.attrib.get("Label", "") or "").strip()
+            section_text = "".join(node.itertext()).strip()
+            if not section_text:
+                continue
+            if label:
+                segments.append(f"{label}: {section_text}")
+            else:
+                segments.append(section_text)
+        abstracts[pmid] = " ".join(segments).strip()
+
+    return abstracts
