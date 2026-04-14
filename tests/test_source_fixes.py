@@ -1,4 +1,4 @@
-from src.sources.europe_pmc import build_europe_pmc_query
+from src.sources.europe_pmc import _in_window, build_europe_pmc_query
 from src.sources.pubmed import _parse_abstracts_from_efetch_xml
 from src.sources.rxiv import _match_topic
 
@@ -39,3 +39,8 @@ def test_europe_pmc_query_has_date_filter() -> None:
 def test_rxiv_match_includes_category() -> None:
     terms = {"HIV_TERMS": ["hiv"], "DLBCL_TERMS": ["dlbcl"]}
     assert _match_topic("", "hiv story", "dlbcl", terms)
+
+
+def test_europe_pmc_in_window() -> None:
+    assert _in_window("2999-01-01", 14)
+    assert not _in_window("2000-01-01", 14)
