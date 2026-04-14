@@ -173,6 +173,7 @@ python -m src.main
 - 上传 `reports/` 为 artifact（保留 7 天）
 - 如果 `reports/` 或 `data/seen_ids.json` 有变化，自动提交回仓库
 - 使用 `concurrency` 避免重复运行
+- 开发测试仅保留单一 CI 工作流：`.github/workflows/ci.yml`（push / pull_request 自动执行 `pytest -q`）
 
 ---
 
