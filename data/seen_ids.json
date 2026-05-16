@@ -1,5 +1,6 @@
 {
   "doi": [
+    "10.1002/ajh.70373",
     "10.1002/ijc.70468",
     "10.1002/jcla.70244",
     "10.1007/s00203-025-04572-0",
@@ -17,6 +18,7 @@
     "10.2169/internalmedicine.5964-25",
     "10.2174/0115748871396063251028053533",
     "10.3324/haematol.2025.300151",
+    "10.3389/fonc.2026.1779897",
     "10.3390/cancers17193138",
     "10.3390/ph18101461",
     "10.3760/cma.j.cn121090-20250703-00313"
@@ -42,7 +44,9 @@
     "42071860",
     "42099060",
     "42104634",
-    "42108217"
+    "42108217",
+    "42137162",
+    "42138287"
   ],
   "pmcid": [
     "PMC12523513",
@@ -55,7 +59,8 @@
     "PMC12981551",
     "PMC13031790",
     "PMC13070594",
-    "PMC13109515"
+    "PMC13109515",
+    "PMC13167544"
   ],
   "title": [
     "attributable fraction of epstein barr virus in subtypes of lymphoma a systematic review and global meta analysis",
@@ -71,12 +76,14 @@
     "isolated pleural effusion as presentation of a large b cell lymphoma a case report and diagnostic considerations",
     "localized stage plasmablastic lymphoma with ulcerative colitis in long term remission after chemoradiotherapy",
     "mutational profiling of hiv diffuse large b cell lymphoma reveals distinct mutational features with evidence of genomic instability",
+    "plasmablastic lymphoma 2026 update on diagnosis risk stratification and management",
     "plasmablastic lymphoma presenting with multiple cutaneous nodules mimicking primary cutaneous marginal zone lymphoma",
     "primary aggressive oral lymphomas paol a narrative review of diagnosis molecular features therapeutic approaches and the integrated role of dentists and hematologists",
     "prognosis and treatment of plasmablastic lymphoma in the united states a multicenter retrospective study",
     "rare and varied presentations of plasmablastic lymphoma a case series",
     "recent advances in infections as risk factors for lymphoma a review of the effects of viral bacterial and fungal infections in lymphoma",
     "sequential manifestation of kaposi s sarcoma and diffuse large b cell lymphoma in the context of hiv infection case report of a rare presentation",
+    "spontaneous regression of stage iv advanced diffuse large b cell lymphoma in an person living with hiv a case report and literature review",
     "what to know about rare b cell malignancies in 2025",
     "when immature plasma cells form lymphoma how to improve on diagnostics and treatment of plasmablastic lymphoma"
   ]
